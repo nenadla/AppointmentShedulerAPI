@@ -16,7 +16,7 @@ namespace AppointmentShedulerAPI.Controllers
         {
             this.appointmentRepository=appointmentRepository;
         }
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> CreateAppointment(CreateAppointmentRequestDto request)
         {
             var appointment = new Appointment
@@ -51,7 +51,7 @@ namespace AppointmentShedulerAPI.Controllers
 
             return Ok(response);
 
-        }
+        }*/
        
     }
 }

@@ -10,5 +10,7 @@ namespace AppointmentShedulerAPI.Data
         }
 
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Service> Services { get; set; }
     }
 }

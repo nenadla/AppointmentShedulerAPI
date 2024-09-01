@@ -13,6 +13,7 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
         {
             this.dbContext = dbContext;
         }
+        
         public async Task<Appointment> CreateAsync(Appointment appointment)
         {
             await dbContext.Appointments.AddAsync(appointment);
