@@ -16,42 +16,49 @@ namespace AppointmentShedulerAPI.Controllers
         {
             this.appointmentRepository=appointmentRepository;
         }
-       /* [HttpPost]
+        [HttpPost]
+
         public async Task<IActionResult> CreateAppointment(CreateAppointmentRequestDto request)
         {
             var appointment = new Appointment
             {
-                Username=request.Username,
-                Email=request.Email,
-                Phone=request.Phone,
-                StartTime=request.StartTime,
-                EndTime=request.EndTime,
-                Service=request.Service,
-                Worker=request.Worker,
-                Counter=1,
-                Cancelled=0
+                Id = Guid.NewGuid(),  
+                StartTime = request.StartTime,
+                EndTime = request.StartTime.AddMinutes(request.Duration),  
+                Worker = request.Worker,
+                UserId = request.UserId,
+                ServiceId = request.ServiceId
             };
 
-           await appointmentRepository.CreateAsync(appointment);
-
+            await appointmentRepository.CreateAppointmentAsync(appointment);
+            
             var response = new AppointmentDto
-            {
-                Id=appointment.Id,
-                Username=appointment.Username,
-                Email=appointment.Email,
-                Phone=appointment.Phone,
-                StartTime=appointment.StartTime,
-                EndTime=appointment.EndTime,
-                Service=appointment.Service,
-                Worker=appointment.Worker,
-                Counter = (int)appointment.Counter,
-                Cancelled = (int)appointment.Cancelled
+                {
+                    // Polja iz Appointment modela
+                    AppointmentId = appointment.Id,
+                    StartTime = appointment.StartTime,
+                    EndTime = appointment.EndTime,
+                    Worker = appointment.Worker,
 
-            };
+                    // Polja iz User modela (preko navigacionog svojstva User)
+                    UserId = appointment.UserId,
+                    Username = appointment.User?.Username,  // Proveri da li User nije null
+                    Phone = appointment.User?.Phone,
+                    Email = appointment.User?.Email,
+                    Counter = appointment.User?.Counter ?? 0,  // Ako je User null, postavi na 0
+                    Edited = appointment.User?.Edited ?? 0,
+                    Cancelled = appointment.User?.Cancelled ?? 0,
+
+                    // Polja iz Service modela (preko navigacionog svojstva Service)
+                    ServiceId = appointment.ServiceId,
+                    ServiceName = appointment.Service?.Name,  // Proveri da li Service nije null
+                    Duration = appointment.Service?.Duration ?? 0,
+                    Price = appointment.Service?.Price ?? 0
+                };
 
             return Ok(response);
 
-        }*/
+        }
        
     }
 }

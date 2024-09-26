@@ -2,6 +2,7 @@
 using AppointmentShedulerAPI.Models.DTO;
 using AppointmentShedulerAPI.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 
 namespace AppointmentShedulerAPI.Controllers
 {
@@ -82,6 +83,40 @@ namespace AppointmentShedulerAPI.Controllers
                 Counter = exsistingUser.Counter,
                 Edited = exsistingUser.Edited,
                 Cancelled = exsistingUser.Cancelled
+            };
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, UpdateUserRequestDto request)
+        {
+            var user = new User
+            {
+                Id=id,
+                Username=request.Username,
+                Email = request.Email,
+                Phone = request.Phone,
+                Counter=request.Counter,
+                Edited = request.Edited,
+                Cancelled = request.Cancelled
+            };
+
+            user = await userRepository.UpdateByIdAsync(user);
+
+            if(user == null)
+            {
+                return NotFound();
+            }
+            var response = new UserDto
+            {
+                Id=user.Id,
+                Username=user.Username,
+                Email = request.Email,
+                Phone = request.Phone,
+                Counter = request.Counter,
+                Edited = request.Edited,
+                Cancelled = request.Cancelled
             };
             return Ok(response);
         }

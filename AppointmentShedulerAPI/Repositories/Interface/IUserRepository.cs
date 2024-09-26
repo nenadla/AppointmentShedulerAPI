@@ -8,5 +8,6 @@ namespace AppointmentShedulerAPI.Repositories.Interface
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> FindByIdAsync(Guid id);
         Task<User?> DeleteUser(Guid id);
+        Task<User?> UpdateByIdAsync(User user);
     }
 }

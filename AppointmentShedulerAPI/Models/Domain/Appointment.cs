@@ -6,7 +6,7 @@
         public Guid Id { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string Worker { get; set; }
+        public string? Worker { get; set; }
 
         // Strani ključevi
         public Guid UserId { get; set; }

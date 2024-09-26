@@ -4,6 +4,6 @@ namespace AppointmentShedulerAPI.Repositories.Interface
 {
     public interface IAppointmentRepository
     {
-        Task<Appointment> CreateAsync(Appointment appointment);
+        Task<Appointment> CreateAppointmentAsync(Appointment appointment);
     }
 }

@@ -2,6 +2,7 @@
 using AppointmentShedulerAPI.Models.Domain;
 using AppointmentShedulerAPI.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 namespace AppointmentShedulerAPI.Repositories.Implementation
 {
@@ -37,6 +38,19 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await dbContext.Users.ToListAsync();
+        }
+
+        public async Task<User?> UpdateByIdAsync(User user)
+        {
+            var exsistingUser =await dbContext.Users.FirstOrDefaultAsync(x=>x.Id == user.Id);
+
+            if (exsistingUser != null) 
+            {
+                dbContext.Entry(exsistingUser).CurrentValues.SetValues(user);
+                await dbContext.SaveChangesAsync();
+                return user;
+            }
+            return null;
         }
     }
 }
