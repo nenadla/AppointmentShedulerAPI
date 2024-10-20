@@ -93,36 +93,22 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
                 return null; 
             }
 
-          
+
             existingAppointment.StartTime = appointment.StartTime;
             existingAppointment.EndTime = appointment.EndTime;
             existingAppointment.Worker = appointment.Worker;
 
             
+            existingAppointment.UserId = appointment.UserId;
+            existingAppointment.ServiceId = appointment.ServiceId;
 
-            if (existingAppointment.User != null)
+            var exsistingUser = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == appointment.UserId);
+            if (exsistingUser != null) 
             {
-                
-                existingAppointment.User.Username = appointment.User?.Username ?? existingAppointment.User.Username;
-                existingAppointment.User.Phone = appointment.User?.Phone ?? existingAppointment.User.Phone;
-                existingAppointment.User.Email = appointment.User?.Email ?? existingAppointment.User.Email;
-
+                exsistingUser.Edited++;
             }
-
-
-            if (appointment.Service != null && existingAppointment.Service != null)
-            {
-                existingAppointment.Service.Name = appointment.Service.Name ?? existingAppointment.Service.Name;
-                existingAppointment.Service.Duration = appointment.Service.Duration != 0 ? appointment.Service.Duration : existingAppointment.Service.Duration;
-                existingAppointment.Service.Price = appointment.Service.Price != 0 ? appointment.Service.Price : existingAppointment.Service.Price;
-
-               
-                
-            }
-
-            
             await dbContext.SaveChangesAsync();
-            return existingAppointment; // Vrati ažurirani appointment
+            return existingAppointment; 
         }
 
     }

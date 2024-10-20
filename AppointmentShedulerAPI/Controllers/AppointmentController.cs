@@ -34,24 +34,24 @@ namespace AppointmentShedulerAPI.Controllers
             
             var response = new AppointmentDto
                 {
-                    // Polja iz Appointment modela
+                    
                     AppointmentId = appointment.Id,
                     StartTime = appointment.StartTime,
                     EndTime = appointment.EndTime,
                     Worker = appointment.Worker,
 
-                    // Polja iz User modela (preko navigacionog svojstva User)
+                    
                     UserId = appointment.UserId,
-                    Username = appointment.User?.Username,  // Proveri da li User nije null
+                    Username = appointment.User?.Username,  
                     Phone = appointment.User?.Phone,
                     Email = appointment.User?.Email,
-                    Counter = appointment.User?.Counter ?? 0,  // Ako je User null, postavi na 0
+                    Counter = appointment.User?.Counter ?? 0,  
                     Edited = appointment.User?.Edited ?? 0,
                     Cancelled = appointment.User?.Cancelled ?? 0,
 
-                    // Polja iz Service modela (preko navigacionog svojstva Service)
+                    
                     ServiceId = appointment.ServiceId,
-                    ServiceName = appointment.Service?.Name,  // Proveri da li Service nije null
+                    ServiceName = appointment.Service?.Name, 
                     Duration = request.Duration,
                     Price = appointment.Service?.Price ?? 0
                 };
@@ -173,24 +173,26 @@ namespace AppointmentShedulerAPI.Controllers
             appointment = await appointmentRepository.UpdateAppointmentByIdAsync(appointment);
 
             if(appointment == null) { return NotFound(); }
+            
 
             var response = new AppointmentDto
             {
                 AppointmentId = appointment.Id,
                 StartTime = appointment.StartTime,
                 EndTime = appointment.EndTime,
-                Worker = appointment.Worker,
+                Worker = appointment.Worker ?? "",
 
                 UserId = appointment.UserId,
                 Username = appointment.User?.Username,
                 Phone = appointment.User?.Phone,
-                Counter = appointment.User?.Counter ?? 0,  // Ako je User null, postavi na 0
-                Edited = appointment.User?.Edited ?? 0,
+                Email = appointment.User?.Email,
+                Counter = appointment.User?.Counter ?? 0, 
+                Edited =  appointment.User?.Edited ?? 0,
                 Cancelled = appointment.User?.Cancelled ?? 0,
 
                 ServiceId = appointment.ServiceId,
                 ServiceName = appointment.Service?.Name,
-                Duration = appointment.Service?.Duration ?? 0,
+                Duration = request.Duration ,
                 Price = appointment.Service?.Price ?? 0
             };
 
