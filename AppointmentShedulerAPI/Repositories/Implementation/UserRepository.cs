@@ -16,9 +16,17 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
         }
         public async Task<User> CreateUserAsync(User user)
         {
+            bool userExists = await dbContext.Users
+                                .AnyAsync(u => u.Username == user.Username || u.Email == user.Email);
+            if (userExists)
+            {
+               
+                throw new InvalidOperationException("Korisnik sa ovim korisničkim imenom ili e-mailom već postoji.");
+            }
+
            await dbContext.Users.AddAsync(user);
            await dbContext.SaveChangesAsync();
-            return user;
+           return user;
         }
 
         public async Task<User?> DeleteUser(Guid id)
@@ -42,6 +50,13 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
 
         public async Task<User?> UpdateByIdAsync(User user)
         {
+            bool userExists = await dbContext.Users
+                                .AnyAsync(u => u.Username == user.Username || u.Email == user.Email);
+            if (userExists)
+            {
+
+                throw new InvalidOperationException("Korisnik sa ovim korisničkim imenom ili e-mailom već postoji.");
+            }
             var exsistingUser =await dbContext.Users.FirstOrDefaultAsync(x=>x.Id == user.Id);
 
             if (exsistingUser != null) 

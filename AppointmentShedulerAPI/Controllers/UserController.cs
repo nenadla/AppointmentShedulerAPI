@@ -2,7 +2,7 @@
 using AppointmentShedulerAPI.Models.DTO;
 using AppointmentShedulerAPI.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.InteropServices;
+using AutoMapper;
 
 namespace AppointmentShedulerAPI.Controllers
 {
@@ -11,137 +11,111 @@ namespace AppointmentShedulerAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository userRepository;
-        public UserController(IUserRepository userRepository)
+        private readonly IMapper mapper;
+
+        public UserController(IUserRepository userRepository, IMapper mapper)
         {
             this.userRepository = userRepository;
+            this.mapper = mapper;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto request)
         {
-            var user = new Models.Domain.User
+            
+            var user = mapper.Map<User>(request);
+            user.Counter = 0;
+            user.Edited = 0;
+            user.Cancelled = 0;
+            
+            try
             {
-                Username = request.Username,
-                Email = request.Email,
-                Phone = request.Phone,
-                Counter = 0,
-                Edited = 0,
-                Cancelled = 0
-            };
-            await userRepository.CreateUserAsync(user);
+                await userRepository.CreateUserAsync(user);
+            }
+            catch (InvalidOperationException ex)
+            {
+                
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new { message = "Došlo je do greške prilikom kreiranja korisnika." });
+            }
 
-            var response = new UserDto
-            {
-              Id=user.Id,
-              Username = user.Username,
-              Email = user.Email,
-              Phone = user.Phone,
-              Counter = user.Counter,
-              Edited = user.Edited,
-              Cancelled = user.Cancelled
-            };
+
+            var response = mapper.Map<UserDto>(user);
             return Ok(response);
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
+           
             var users = await userRepository.GetAllUsersAsync();
-            var response= new List<UserDto>();
 
-            foreach (var user in users)
-            {
-                response.Add(new UserDto
-                {
-                    Id = user.Id,
-                    Username=user.Username,
-                    Email = user.Email,
-                    Phone = user.Phone,
-                    Counter = user.Counter,
-                    Edited = user.Edited,
-                    Cancelled = user.Cancelled
-                });
-            }
+            
+            var response = mapper.Map<List<UserDto>>(users);
             return Ok(response);
         }
 
-        [HttpGet]
-        [Route("{id:Guid}")]
+        [HttpGet("{id:Guid}")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid id)
         {
-            var exsistingUser = await userRepository.FindByIdAsync(id);
+            
+            var existingUser = await userRepository.FindByIdAsync(id);
 
-            if(exsistingUser == null)
+            if (existingUser == null)
             {
                 return NotFound();
             }
-            var response = new UserDto
-            {
-                Id = exsistingUser.Id,
-                Username = exsistingUser.Username,
-                Email = exsistingUser.Email,
-                Phone = exsistingUser.Phone,
-                Counter = exsistingUser.Counter,
-                Edited = exsistingUser.Edited,
-                Cancelled = exsistingUser.Cancelled
-            };
+
+           
+            var response = mapper.Map<UserDto>(existingUser);
             return Ok(response);
         }
 
-        [HttpPut]
-        [Route("{id:Guid}")]
-        public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, UpdateUserRequestDto request)
+        [HttpPut("{id:Guid}")]
+        public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, [FromBody] UpdateUserRequestDto request)
         {
-            var user = new User
-            {
-                Id=id,
-                Username=request.Username,
-                Email = request.Email,
-                Phone = request.Phone,
-                Counter=request.Counter,
-                Edited = request.Edited,
-                Cancelled = request.Cancelled
-            };
+            var user = mapper.Map<User>(request);
+            user.Id = id;
 
-            user = await userRepository.UpdateByIdAsync(user);
-
-            if(user == null)
+            try
             {
-                return NotFound();
+                var updatedUser = await userRepository.UpdateByIdAsync(user);
+
+                if (updatedUser == null)
+                {
+                    return NotFound();
+                }
+                var response = mapper.Map<UserDto>(updatedUser);
+                return Ok(response); 
             }
-            var response = new UserDto
+            catch (InvalidOperationException ex)
             {
-                Id=user.Id,
-                Username=user.Username,
-                Email = request.Email,
-                Phone = request.Phone,
-                Counter = request.Counter,
-                Edited = request.Edited,
-                Cancelled = request.Cancelled
-            };
-            return Ok(response);
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Došlo je do greške prilikom ažuriranja korisnika.", details = ex.Message });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id:Guid}")]
+
+        [HttpDelete("{id:Guid}")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
+            
             var user = await userRepository.DeleteUser(id);
 
-            if(user == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            var response = new UserDto
-            {
-                Id= user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                Phone = user.Phone,
-                Counter = user.Counter,
-                Edited = user.Edited,
-                Cancelled = user.Cancelled
-            };
+            
+            var response = mapper.Map<UserDto>(user);
             return Ok(response);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using AppointmentShedulerAPI.Models.Domain;
 using AppointmentShedulerAPI.Models.DTO;
 using AppointmentShedulerAPI.Repositories.Interface;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentShedulerAPI.Controllers
@@ -10,30 +11,22 @@ namespace AppointmentShedulerAPI.Controllers
     public class ServiceController : ControllerBase
     {
         private readonly IServiceRepository serviceRepository;
-        public ServiceController(IServiceRepository serviceRepository)
+        private readonly IMapper mapper;
+        public ServiceController(IServiceRepository serviceRepository, IMapper mapper)
         {
             this.serviceRepository = serviceRepository;
-        }
+            this.mapper = mapper;
+           
+    }
 
         [HttpPost]
         public async Task<IActionResult> CreateService([FromBody] CreateServiceRequest request)
         {
-            var service = new Models.Domain.Service
-            {
-                Name = request.Name,
-                Duration = request.Duration,
-                Price = request.Price
-            };
-
+            var service = mapper.Map<Service>(request);
+           
             await serviceRepository.CreateService(service);
 
-            var response = new ServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Duration = service.Duration,
-                Price = service.Price
-            };
+            var response =mapper.Map<ServiceDto>(service);
             return Ok(response);
 
         }
@@ -42,18 +35,7 @@ namespace AppointmentShedulerAPI.Controllers
         public async Task<IActionResult> GetAllServices()
         {
             var services = await serviceRepository.GetAllAsync();
-            var response = new List<ServiceDto>();
-
-            foreach (var service in services)
-            {
-                response.Add(new ServiceDto
-                {
-                    Id = service.Id,
-                    Name = service.Name,
-                    Duration = service.Duration,
-                    Price = service.Price
-                });
-            }
+            var response = mapper.Map<List<ServiceDto>>(services);
 
             return Ok(response);
         }
@@ -69,13 +51,7 @@ namespace AppointmentShedulerAPI.Controllers
                 return NotFound();
             }
 
-            var response = new ServiceDto
-            {
-                Id = exsistingService.Id,
-                Name = exsistingService.Name,
-                Duration = exsistingService.Duration,
-                Price = exsistingService.Price
-            };
+            var response = mapper.Map<ServiceDto>(exsistingService);
             return Ok(response);
         }
 
@@ -83,26 +59,15 @@ namespace AppointmentShedulerAPI.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> UpdateService([FromRoute] Guid id, UpdateServiceRequestDto request)
         {
-            var service = new Service
-            {
-                Id = id,
-                Name = request.Name,
-                Duration = request.Duration,
-                Price = request.Price,
-            };
+            var service = mapper.Map<Service>(request);
+            service.Id = id;
 
             service = await serviceRepository.UpdateByIdAsync(service);
             if (service == null)
             {
                 return NotFound();
             }
-            var response = new ServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Duration = service.Duration,
-                Price = service.Price,
-            };
+            var response = mapper.Map<ServiceDto>(service);
             return Ok(response);
         }
 
@@ -116,13 +81,7 @@ namespace AppointmentShedulerAPI.Controllers
             {
                 return NotFound();
             }
-            var response = new ServiceDto
-            {
-                Id= service.Id,
-                Name = service.Name,
-                Duration = service.Duration,
-                Price = service.Price
-            };
+            var response = mapper.Map<ServiceDto>(service);
             return Ok(response);
         }
         

@@ -17,7 +17,7 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
 
         public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
         {
-            // Proveri da li User postoji u bazi
+            
             var user = await dbContext.Users.FindAsync(appointment.UserId);
             if (user == null)
             {
@@ -26,7 +26,7 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
 
             user.Counter++;
 
-            // Proveri da li Service postoji u bazi
+            
             var service = await dbContext.Services.FindAsync(appointment.ServiceId);
             if (service == null)
             {
@@ -36,9 +36,24 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
             appointment.User = user;
             appointment.Service = service;
 
-            // Kreiraj novi termin
+            DateTime today = DateTime.Today;
+            DateTime maxDate = today.AddDays(21);
+            var existingAppointments = await GetAppointmentsInRangeAsync(today, maxDate);
+
+            bool isOverlapping = existingAppointments.Any(a =>
+               (appointment.StartTime < a.EndTime && appointment.EndTime > a.StartTime) || 
+               (appointment.EndTime > a.StartTime && appointment.EndTime < a.EndTime) || 
+               (appointment.StartTime <= a.StartTime && appointment.EndTime >= a.EndTime) || 
+               (appointment.StartTime >= a.StartTime && appointment.EndTime <= a.EndTime));
+
+            if (isOverlapping)
+            {
+                throw new Exception("Termin se preklapa sa postojećim terminima.");
+            }
+
+
             await dbContext.Appointments.AddAsync(appointment);
-            await dbContext.SaveChangesAsync();  // Čuvanje promena uključujući ažuriranje User.Counter
+            await dbContext.SaveChangesAsync();  
 
             return appointment;
         }
@@ -80,6 +95,14 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
 
         }
 
+        public async Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end)
+        {
+            return await dbContext.Appointments
+                .Where(a => a.StartTime >= start && a.StartTime < end) 
+                .ToListAsync();
+        }
+
+
         public async Task<Appointment?> UpdateAppointmentByIdAsync(Appointment appointment)
         {
            
@@ -91,6 +114,21 @@ namespace AppointmentShedulerAPI.Repositories.Implementation
             if (existingAppointment == null)
             {
                 return null; 
+            }
+
+            DateTime today = DateTime.Today;
+            DateTime maxDate = today.AddDays(21);
+            var existingAppointments = await GetAppointmentsInRangeAsync(today, maxDate);
+
+            bool isOverlapping = existingAppointments.Any(a =>
+               (appointment.StartTime < a.EndTime && appointment.EndTime > a.StartTime) ||
+               (appointment.EndTime > a.StartTime && appointment.EndTime < a.EndTime) ||
+               (appointment.StartTime <= a.StartTime && appointment.EndTime >= a.EndTime) ||
+               (appointment.StartTime >= a.StartTime && appointment.EndTime <= a.EndTime));
+
+            if (isOverlapping)
+            {
+                throw new Exception("Termin se preklapa sa postojećim terminima.");
             }
 
 

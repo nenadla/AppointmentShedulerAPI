@@ -9,5 +9,6 @@ namespace AppointmentShedulerAPI.Repositories.Interface
         Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
         Task<Appointment?> DeleteAppointment(Guid id);
         Task<Appointment?> UpdateAppointmentByIdAsync(Appointment appointment);
+        Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end);
     }
 }
